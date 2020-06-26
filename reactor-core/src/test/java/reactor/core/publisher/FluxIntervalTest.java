@@ -144,6 +144,15 @@ public class FluxIntervalTest {
 	}
 
 	@Test
+	public void scanOperator() {
+		final Flux<Long> interval = Flux.interval(Duration.ofSeconds(1));
+
+		assertThat(interval).isInstanceOf(Scannable.class);
+		assertThat(from(interval).scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.parallel());
+		assertThat(from(interval).scan(Scannable.Attr.RUN_STYLE)).isSameAs(Scannable.Attr.RunStyle.ASYNC);
+	}
+
+	@Test
     public void scanIntervalRunnable() {
 		Scheduler.Worker worker = Schedulers.single().createWorker();
 
@@ -153,6 +162,7 @@ public class FluxIntervalTest {
 
         assertThat(test.scan(Scannable.Attr.RUN_ON)).isSameAs(worker);
         assertThat(test.scan(Scannable.Attr.ACTUAL)).isSameAs(actual);
+        assertThat(test.scan(Scannable.Attr.RUN_STYLE)).isSameAs(Scannable.Attr.RunStyle.ASYNC);
         assertThat(test.scan(Scannable.Attr.CANCELLED)).isFalse();
         test.cancel();
         assertThat(test.scan(Scannable.Attr.CANCELLED)).isTrue();
@@ -162,14 +172,6 @@ public class FluxIntervalTest {
 		}
     }
 
-    @Test
-    public void scanOperator() {
-	    final Flux<Long> interval = Flux.interval(Duration.ofSeconds(1));
-
-	    assertThat(interval).isInstanceOf(Scannable.class);
-	    assertThat(from(interval).scan(Scannable.Attr.RUN_ON)).isSameAs(Schedulers.parallel());
-	    assertThat(from(interval).scan(Scannable.Attr.RUN_STYLE)).isSameAs(Scannable.Attr.RunStyle.ASYNC);
-    }
 
     @Test
 	public void tickOverflow() {
